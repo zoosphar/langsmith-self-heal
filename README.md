@@ -1,13 +1,38 @@
-# eval-healer
+# langsmith-eval-healer
 
 ![Works with any LangSmith project](https://img.shields.io/badge/Works_with-any_LangSmith_project-4c1?style=for-the-badge)
 
 Self-healing LangSmith eval pipeline service. It runs on FastAPI + APScheduler inside one Docker container, proposes atomic fixes with Claude Sonnet, validates score improvements, opens draft PRs, and posts Slack notifications. Human review is always required.
 
+# Why I Built This
+
+At AdQuick, I was maintaining an AI Copilot with 53 tool calls.
+
+When evals started failing, debugging why an LLM picks the wrong 
+tool was a manual nightmare — reading traces, tweaking prompts, 
+updating tool descriptions, rerunning evals. Each tool took 2-3 
+days to fix.
+
+We built a golden dataset for each tool using LLM-assisted examples. 
+Fast to build — but LLMs generate subtly wrong examples too. Our 
+LLM-as-judge score came back at 63%. No systematic way to find what 
+was broken.
+
+So I built this. A nightly loop that diagnoses failures, asks Claude 
+Sonnet for one precise atomic fix, reruns evals, and drafts a PR if 
+the score improves. Humans always approve.
+
+After the first run, score jumped to 80%+.
+
+The unexpected insight: 3 tools stayed at exactly 0% while everything 
+else improved. That shouldn't happen. Zero movement meant the golden 
+dataset examples themselves were wrong — not the code. The self-healer 
+exposed bad training data by elimination.
+
 ## One-click Deploy
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/zoosphar/langsmith-self-heal
 cp healer/.env.example healer/.env
 nano healer/.env
 docker-compose -f healer/docker-compose.yml up -d
@@ -117,3 +142,12 @@ cd healer
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
+
+## Let's Talk Evals
+
+Building agentic AI workflows and struggling with eval coverage?
+
+I help teams design and implement eval pipelines for production 
+agentic systems with 10+ tools.
+
+reach out: avrlsngh@gmail.com
