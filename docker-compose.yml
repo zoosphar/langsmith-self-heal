@@ -1,0 +1,11 @@
+services:
+  eval-healer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eval-healer
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    restart: always
